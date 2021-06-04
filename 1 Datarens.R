@@ -1,14 +1,38 @@
-#Datarens
-
+#Source datasæt
 source("0 Data.R")
 
-#kun fulde besvarelser
-dataset <- dataset %>% filter(stato_4 == 1) 
+#Frasorter ufærdige besvarelse
+dataset           <- dataset %>% filter(stato_4 == 1) 
 
-#skal have besvaret første spørgsmål
-dataset <- dataset %>% filter(alder > 0)
+#Frasorter dem, der ikke har svaret på første spørgsmål (dvs. dem der
+#ikke er kandidatstuderende)
+dataset           <- dataset %>% filter(alder > 0)
 
-#id variabel
-dataset$ID <- 1:nrow(dataset)
+#Frasorter besvarelser angivet før udsendelsen (tests udfyldt af mig)
+test              <- dataset %>%
+                     filter(starttim >= as.Date('2021-04-22') & starttim <= as.Date('2021-04-27'))
 
-dataset$ID
+#Frasorter to besvarelser, jeg har lavet på dagen
+dataset           <- dataset %>% filter(responde != 797151748)
+dataset           <- dataset %>% filter(responde != 797257240)
+
+#Definer missing values for valgfags-spørgsmål
+dataset$s_71[is.na(dataset$s_71)] <- "Har endnu ikke valgt valgfag"
+dataset$s_72[is.na(dataset$s_72)] <- "Har endnu ikke valgt valgfag"
+dataset$s_73[is.na(dataset$s_73)] <- "Har endnu ikke valgt valgfag"
+dataset$s_75[is.na(dataset$s_75)] <- "Har endnu ikke valgt valgfag"
+dataset$s_115[is.na(dataset$s_115)] <- "Har endnu ikke valgt valgfag"
+
+#Frasorter variable med datoer osv., som jeg ikke skal bruge
+dataset           <- dataset %>% select (-c(modified, 
+                                  closetim, 
+                                  starttim, 
+                                  created, 
+                                  importgr, 
+                                  distribu, 
+                                  email, 
+                                  digit_1))
+
+#Angiv NA som "MISSING" for at kunne bruge dem som passive kategorier
+dataset[is.na(dataset)] <- "MISSING"
+
